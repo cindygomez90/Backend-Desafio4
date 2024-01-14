@@ -6,38 +6,38 @@
     <title>Wemí Cueros</title>
 </head>
 <body>
-    <h1>Bienvenidos a nuestra tienda online</h1>
+    <h1>Bienvenidos a nuestra tienda online!</h1>
     
         <div>
             <h3>Carga de producto</h3>
-            <form id="product-form" onsubmit="return agregarProducto()">
+            <form action="/realTimeProducts" method="post" id="productForm" onsubmit="addProduct(); return false;">
+        
                 <label for="title">Nombre:</label>
-                <input type="text" id="title" required>
-
+                <input type="text" id="title" required>    
+                
                 <label for="description">Descripción:</label>
                 <input type="text" id="description" required>
-
+                
                 <label for="price">Precio:</label>
                 <input type="number" id="price" required>
-
+                
                 <label for="thumbail">Imagen:</label>
                 <input type="text" id="thumbail" required>
-
+        
                 <label for="code">Código:</label>
                 <input type="text" id="code" required>
-
+                
                 <label for="stock">Stock:</label>
                 <input type="number" id="stock" required>    
-
-                <button type="submit">Enviar</button>
+                
+                    <input value="Agregar" type="submit" id="boton-agregar" onclick="addProduct()">
+                </li>
             </form>
-
-
         </div>
         
         <div>
             <h3>Lista de productos actualizada</h3>
-            <ul id="product-list">
+            <ul id="productList">
                 {{#each products}}
                     <li>Nombre: {{this.title}} <br>
                         Descripción: {{this.description}}<br>
@@ -45,14 +45,15 @@
                         Imagen: {{this.thumbail}}<br>
                         Código: {{this.code}}<br>
                         Stock: {{this.stock}}<br> 
-                        <button onclick="eliminarProducto">Eliminar</button></li>
+                        <button type="button" class="boton-eliminar" onclick="deleteProduct('{{this.pid}}')">Eliminar</button>
+                    </li>
                 {{/each}}
             </ul>
-        </div>
+        </div>    
         
 </body>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="../public/js/index.js"></script>
+<script src="/js/index.js"></script>
 
 </html>

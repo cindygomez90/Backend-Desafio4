@@ -5,6 +5,8 @@ const cartsRouter = require ("./routers/carts.router.js")
 const handlebars  = require('express-handlebars')
 const viewsRouter = require ("./routers/views.router.js")
 const { Server }  = require('socket.io') 
+const ProductManager = require("../src/managers/productsManager.js")
+const productManager = new ProductManager()
 
 const app = express()
 const PORT = 8080 || process.env.PORT
@@ -15,15 +17,16 @@ app.set("views", __dirname + "/views")
 app.set("view engine", "handlebars")  
 
 //para servir los archivos estáticos
-app.use(express.static(__dirname + './public'))
+app.use(express.static(__dirname + '/public'))
 
 app.use(express.json())   
 app.use(express.urlencoded({ extended: true }))
 
+//llamado a los archivos de vista
 app.use("/", viewsRouter)
+app.use("/realtimeproducts", viewsRouter)
 
-
-//Llamado a los archivos routers
+//llamado a los archivos routers
 app.use ('/api/products', productsRouter)
 app.use ('/api/carts', cartsRouter)
 
@@ -34,18 +37,30 @@ const httpServer = app.listen(PORT, () => {
 
 const io = new Server (httpServer)
 
-const products = []
-
-io.on('connection', socket =>{
+io.on('connection', async (socket) => {
     console.log('cliente conectado')
     
-    socket.on('productoCargado', data => {  
-        console.log(data)
-        products.push(data)
+    socket.on("addProduct", async (data) => {
+        const newProduct = {
+            title: data.title,
+            description: data.description,
+            price: data.price,
+            thumbail: data.thumbail,
+            code: data.code,
+            stock: data.stock,            
+        }
+        await productManager.addProduct(newProduct)
         
-        io.emit('listadoActualizado', products) 
-    })
+        const updatedProducts = await productManager.getProducts()
+        io.emit("updateProducts", updatedProducts)
+            });
     
-})
+    socket.on("deleteProduct", async (data) => {
+        const pid = data.pid;
+        await productManager.deleteProduct(parseInt(pid))
+        const updatedProducts = await productManager.getProducts()
+        io.emit("updateProducts", updatedProducts)
+        })
+    })
 
 

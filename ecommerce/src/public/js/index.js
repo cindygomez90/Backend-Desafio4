@@ -1,26 +1,52 @@
 const socket = io() 
 
+function addProduct() {
 
-const form = document.getElementById('product-form')
+    let title = document.getElementById("title").value
+    let description = document.getElementById("description").value
+    let price = document.getElementById("price").value
+    let thumbail = document.getElementById("thumbail").value
+    let code = document.getElementById("code").value
+    let stock = document.getElementById("stock").value
+    
+    if (parseFloat(price) < 0 || parseInt(stock) < 0) {
+        alert("El precio y el stock no pueden ser números negativos.")
+        return;
+    }
 
-form.addEventListener('submit', function (event) {
-    event.preventDefault()
+    socket.emit("addProduct", { title, description, price, thumbail, code, stock})
+}
 
-    const title = document.getElementById('title').value
-    const description = document.getElementById('description').value
-    const price = document.getElementById('price').value
-    const thumbail = document.getElementById('thumbail').value
-    const code = document.getElementById('code').value
-    const stock = document.getElementById('stock').value
+function deleteProduct(pid) {
+    socket.emit("deleteProduct", {pid})
+}
 
-    socket.emit('productoCargado', {
-        Nombre: title.value,
-        Descripción: description.value,
-        Precio: price.value,
-        Imagen: thumbail.value,
-        Código: code.value,
-        Stock: stock.value
+socket.on("updateProducts", (data) => {
+    console.log("Tipo de 'data.products':", typeof data)
+    console.log("Contenido de 'data.products':", data)
+
+const productList = document.getElementById("productList")
+
+if (productList && Array.isArray(data)) {
+    productList.innerHTML = ""
+    
+    data.forEach((product) => {
+    const productContainer = document.createElement("li")
+        productContainer.innerHTML = `   
+        <li>   
+        Nombre: ${product.title}<br>
+        Descripción: ${product.description}<br>
+        Precio: ${product.price}<br>
+        Imagen: ${product.thumbail}<br>
+        Código: ${product.code}<br>
+        Stock: ${product.stock}<br>
+        
+        <button type="button" onclick="deleteProduct('${product.pid}')">Eliminar</button>
+        </li>
+        `;
+        productList.appendChild(productContainer);
     })
-
-    form.reset()
+} else {
+    console.log("Error: La estructura de datos de 'data' no es válida.")
+}
 })

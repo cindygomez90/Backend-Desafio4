@@ -11,8 +11,26 @@ router.get('/home', (req, res) => {
 })
 
 //ruta para realTimeProducts.handlebars
-router.get('/realtimeproducts', (req, res) => {
-    res.render('realTimeProducts', { products });
+router.get('/realtimeproducts', async (req, res) => {
+    try {
+        res.render('realTimeProducts', { products });
+    } catch (error) {
+        console.log(error);
+        res.render('error', { message: 'Error al intentar obtener la lista de productos.' });
+    }
 })
+
+router.post('/', async (req, res) => {
+    try {
+        res.render('realTimeProducts', {
+            products
+        })
+    } catch (error) {
+        console.log(error);
+        res.render("Error al intentar obtener la lista de productos!");
+        return;
+    }
+})
+
 
 module.exports = router
